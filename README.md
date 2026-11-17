@@ -1,7 +1,17 @@
-# Grand Theft Auto 6: старт
+# Grand Theft Auto VI Start
 
-Независимый справочник для новичков. Отдельные HTML-страницы; статическая публикация на GitHub Pages.
+Русский фанатский справочник. Статический сайт с отдельными страницами.
 
-Страницы: главная, новичкам, региональное время выхода, база знаний, места, миссии, обновления, источники.
+Функции: меню VI, навигация, поиск и фильтры каталогов, избранное, карточки, региональное время выхода, личные цели, пользовательская карта (изображение в IndexedDB, точки в localStorage, импорт и экспорт).
 
-Миссии и географическая карта ожидают проверенных данных. Скриншоты загружаются с сайта Rockstar Games. Источники приведены в sources.html. regions.js содержит список зон IANA из zone.tab. Автоматического наполнения контентом нет.
+Полная база GTABase не копировалась. Стартовые фактические записи сверены по публичным страницам транспорта и оружия GTABase 17.11.2026; текст оригинальный, игровые характеристики неизвестны. Карта, магазины и полный список миссий не заполнены.
+
+Sources for editorial maintenance (not displayed in UI):
+- https://www.gtabase.com/gta-6/vehicles/
+- https://www.gtabase.com/gta-6/weapons/
+- https://www.rockstargames.com/VI
+- https://www.rockstargames.com/VI/media/screenshots
+- https://support.rockstargames.com/articles/29jV3Cv2cCgvwM1XgtMO5o/grand-theft-auto-vi-regional-pre-load-and-release-times-on-playstation-5-and-xbox-series-x-or-s?pubDate=20261110
+- https://www.iana.org/time-zones
+
+Изображения Rockstar загружаются с официального сайта. Пиктограммы классов написаны в SVG и не изображают точные модели. Автоматического наполнения данными нет.

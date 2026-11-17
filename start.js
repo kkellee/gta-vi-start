@@ -24,7 +24,7 @@ if ($('#knowledge-results')) {
     const category=$('#category').value;
     const rows=KNOWLEDGE.filter(row=>(category==='all'||row.category===category)&&(row.title+' '+row.body).toLocaleLowerCase('ru').includes(query));
     $('#result-count').textContent=rows.length ? 'Найдено материалов: '+rows.length : 'Ничего не найдено. Попробуй другой запрос или категорию.';
-    $('#knowledge-results').innerHTML=rows.map(row=>'<article class="knowledge-card"><p class="eyebrow dark">'+esc(row.category)+'</p><h2>'+esc(row.title)+'</h2><p>'+esc(row.body)+'</p><a class="source" href="'+row.source+'" target="_blank" rel="noopener noreferrer">Официальный источник ↗</a><p class="small">Проверено 17.11.2026</p>'+(row.link?'<a class="inline-link" href="'+row.link+'">'+esc(row.linkText)+' →</a>':'')+'</article>').join('');
+    $('#knowledge-results').innerHTML=rows.map(row=>'<article class="knowledge-card"><p class="eyebrow dark">'+esc(row.category)+'</p><h2>'+esc(row.title)+'</h2><p>'+esc(row.body)+'</p><p class="small">Проверено 17.11.2026</p>'+(row.link?'<a class="inline-link" href="'+row.link+'">'+esc(row.linkText)+' →</a>':'')+'</article>').join('');
   }
   $('#knowledge-search').addEventListener('input',renderKnowledge);
   $('#category').addEventListener('change',renderKnowledge);
