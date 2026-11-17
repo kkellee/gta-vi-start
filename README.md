@@ -1,2 +1,7 @@
-# vicecity-hub
-Independent GTA VI fan hub: launch information, guides, discoveries and progress tracking.
+# Grand Theft Auto 6: старт
+
+Независимый справочник для новичков. Отдельные HTML-страницы; статическая публикация на GitHub Pages.
+
+Страницы: главная, новичкам, региональное время выхода, база знаний, места, миссии, обновления, источники.
+
+Миссии и географическая карта ожидают проверенных данных. Скриншоты загружаются с сайта Rockstar Games. Источники приведены в sources.html. regions.js содержит список зон IANA из zone.tab. Автоматического наполнения контентом нет.
