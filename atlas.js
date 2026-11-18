@@ -1,5 +1,4 @@
 'use strict';
-const CATALOGS = {"vehicles":[{"id":"surfer","name":"BF Surfer","maker":"BF","category":"Фургоны","description":"Фургон в стартовой подборке транспорта. Подробности приобретения и характеристики ещё не проверены.","type":"van"},{"id":"volatus","name":"Buckingham Volatus","maker":"Buckingham","category":"Вертолёты","description":"Вертолёт. Карточка будет дополнена после проверки доступности и способов получения в игре.","type":"heli"},{"id":"coquette","name":"Invetero Coquette Classic","maker":"Invetero","category":"Спортклассика","description":"Классический спортивный автомобиль. Скорость, цена и возможности тюнинга пока не заполнены.","type":"car"},{"id":"granger","name":"Declasse Granger Police","maker":"Declasse","category":"Спецтранспорт","description":"Полицейский транспорт. Места появления и особенности использования пока не проверены.","type":"car"},{"id":"wastelander","name":"MTL Wastelander","maker":"MTL","category":"Служебные","description":"Специальная машина. Характеристики из прошлых частей не переносим в GTA VI.","type":"truck"},{"id":"stallion","name":"Declasse Stallion","maker":"Declasse","category":"Маслкары","description":"Автомобиль класса маслкаров. Данные о стоимости и местах появления появятся после проверки.","type":"car"}],"weapons":[{"id":"bat","name":"Бейсбольная бита","maker":"Не указан","category":"Ближний бой","description":"Оружие ближнего боя. Урон и места получения в GTA VI пока не проверены.","type":"melee"},{"id":"akm","name":"Shrewsbury AKM","maker":"Shrewsbury","category":"Винтовки","description":"Автоматическая винтовка. Данные об уроне, магазине и модификациях ожидают проверки.","type":"rifle"},{"id":"grenade","name":"Граната","maker":"Не указан","category":"Метательное","description":"Метательное снаряжение. Стоимость и внутриигровые параметры ещё не заполнены.","type":"grenade"},{"id":"knife","name":"Hawk & Little Knife","maker":"Hawk & Little","category":"Ближний бой","description":"Нож. Карточка будет дополнена проверенными сведениями о получении.","type":"melee"}]};
 const atlasGet = s => document.querySelector(s);
 const atlasEscape = text => String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function atlasRead(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}}
@@ -21,31 +20,6 @@ function silhouette(type){
  grenade:'<path d="M100 30h38l18 20v36l-18 18h-38L82 86V50Z"/><path d="M108 30V17h21v13m0-12h35v36M89 56h60M89 76h60M111 37v60m17-60v60"/>'
  };
  return '<svg viewBox="0 0 240 120" aria-hidden="true">'+(shapes[type]||shapes.car)+'</svg>';
-}
-if(atlasGet('[data-catalog]')){
- const kind=atlasGet('[data-catalog]').dataset.catalog,rows=CATALOGS[kind];
- let category='Все',favoritesOnly=false;
- let favorites=atlasRead('start-favorites',[]);if(!Array.isArray(favorites))favorites=[];
- const key=row=>kind+':'+row.id;
- const categories=['Все',...new Set(rows.map(r=>r.category))];
- function render(){
-   atlasGet('#catalog-filters').innerHTML=categories.map(cat=>'<button type="button" data-category="'+atlasEscape(cat)+'" class="'+(category===cat?'active':'')+'" aria-pressed="'+(category===cat)+'">'+atlasEscape(cat)+' <small>('+rows.filter(r=>cat==='Все'||r.category===cat).length+')</small></button>').join('');
-   const q=atlasGet('#catalog-search').value.trim().toLocaleLowerCase('ru');
-   const result=rows.filter(r=>(category==='Все'||r.category===category)&&(!favoritesOnly||favorites.includes(key(r)))&&(r.name+' '+r.maker+' '+r.category).toLocaleLowerCase('ru').includes(q)).sort((a,b)=>a.name.localeCompare(b.name,'ru')*(atlasGet('#catalog-sort').value==='asc'?1:-1));
-   atlasGet('#catalog-count').textContent='Показано '+result.length+' из '+rows.length;
-   atlasGet('#catalog-empty').hidden=!!result.length;
-   atlasGet('#catalog-grid').innerHTML=result.map(r=>'<article class="db-card"><button class="favorite-button" data-favorite="'+r.id+'" aria-label="В избранное: '+atlasEscape(r.name)+'" aria-pressed="'+favorites.includes(key(r))+'">'+(favorites.includes(key(r))?'★':'☆')+'</button><div class="db-visual"><span>ИКОНКА КЛАССА</span>'+silhouette(r.type)+'</div><div class="db-info"><h2>'+atlasEscape(r.name)+'</h2><p>'+atlasEscape(r.category)+' / '+atlasEscape(r.maker)+'</p><button class="detail-button" data-detail="'+r.id+'">Открыть карточку →</button></div></article>').join('');
- }
- atlasGet('#catalog-filters').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(b){category=b.dataset.category;render();}});
- atlasGet('#catalog-search').addEventListener('input',render);
- atlasGet('#catalog-sort').addEventListener('change',render);
- atlasGet('#only-favorites').addEventListener('click',e=>{favoritesOnly=!favoritesOnly;e.currentTarget.setAttribute('aria-pressed',String(favoritesOnly));render();});
- atlasGet('#catalog-grid').addEventListener('click',e=>{
-   const fav=e.target.closest('[data-favorite]'),detail=e.target.closest('[data-detail]');
-   if(fav){const r=rows.find(r=>r.id===fav.dataset.favorite),id=key(r);favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];atlasSave('start-favorites',favorites);render();}
-   if(detail){const r=rows.find(r=>r.id===detail.dataset.detail);atlasGet('#item-detail').innerHTML='<p class="eyebrow">'+atlasEscape(r.category)+'</p><h2>'+atlasEscape(r.name)+'</h2><p class="detail-description">'+atlasEscape(r.description)+'</p><table class="detail-table"><tr><td>Производитель</td><td>'+atlasEscape(r.maker)+'</td></tr><tr><td>Класс</td><td>'+atlasEscape(r.category)+'</td></tr><tr><td>Цена</td><td>Не проверена</td></tr><tr><td>'+(kind==='vehicles'?'Скорость':'Урон')+'</td><td>Не проверено</td></tr><tr><td>Где найти</td><td>Ожидает проверки</td></tr></table><p class="detail-status">Стартовая запись по опубликованным материалам. Игровые параметры ещё не проверены. Иллюстрация обозначает класс, а не внешний вид модели.</p>';atlasGet('#item-dialog').showModal();}
- });
- render();
 }
 document.querySelectorAll('.platform-tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.platform-tab').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b));});atlasGet('#cheat-platform').textContent=b.dataset.platform.toUpperCase();}));
 if(atlasGet('#task-form')){
