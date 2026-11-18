@@ -1,0 +1,47 @@
+'use strict';
+// Small, consistent pictograms drawn for Start. No remote icon dependency.
+(()=>{const paths={
+ home:'M3 11 12 3l9 8M5 10v11h5v-7h4v7h5V10',
+ map:'m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Zm6-2v16m6-14v16',
+ car:'m5 8 2-4h10l2 4M3 10h18v8H3v-8Zm2 8v3m14-3v3M6 13h2m8 0h2M3 8l-1-1m19 1 1-1',
+ weapon:'M3 7h16v5h-8l-2 8H5l2-8H3V7Zm16 1h3v3h-3M11 12v4h4v-4',
+ mission:'M7 4h13v17H4V4h3m1-2h8v5H8V2Zm0 10h8m-8 4h6',
+ people:'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 10v-3a7 7 0 0 1 14 0v3m1-17a4 4 0 0 1 0 8m2 3a6 6 0 0 1 3 5',
+ check:'M4 4h16v16H4V4Zm3 8 3 3 7-7',
+ radio:'M4 7h16v14H4V7Zm2 0 12-5M8 11a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm7 0h3m-3 4h3',
+ game:'M7 7h10a4 4 0 0 1 4 3l1 7a3 3 0 0 1-5 2l-2-2H9l-2 2a3 3 0 0 1-5-2l1-7a4 4 0 0 1 4-3Zm0 3v5m-2-2h4m7-2h.1m2 3h.1',
+ clock:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4v6l4 2',
+ pin:'M12 22s8-8 8-14a8 8 0 0 0-16 0c0 6 8 14 8 14Zm0-17a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',
+ shop:'M3 10h18l-2-7H5l-2 7Zm2 0v11h14V10M9 21v-7h6v7M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0',
+ bank:'m2 8 10-6 10 6H2Zm3 3v7m7-7v7m7-7v7M2 21h20',
+ shirt:'m8 3-6 4 3 5 3-2v11h8V10l3 2 3-5-6-4a4 4 0 0 1-8 0Z',
+ food:'M5 2v8m-3-8v5a3 3 0 0 0 6 0V2M5 10v12M18 2c-4 4-5 10 0 10V2Zm0 10v10',
+ fuel:'M3 21V4h10v17M5 7h6m2 4h3v6a2 2 0 0 0 4 0V9l-4-5M2 21h12',
+ scissors:'m7 10 13 11M7 14 20 3M5 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm0 10a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',
+ gem:'m3 8 4-5h10l4 5-9 13L3 8Zm0 0h18M7 3l5 18 5-18',
+ phone:'M7 2h10v20H7V2Zm3 3h4m-3 16h2',
+ wrench:'M21 3a6 6 0 0 1-8 8L5 21l-3-3 10-8a6 6 0 0 1 8-8l-5 4 3 3 3-6Z',
+ garage:'m2 8 10-6 10 6M4 7v15h16V7M7 22V11h10v11m-10-7h10m-10 4h10',
+ plane:'m2 11 8-3V3a2 2 0 0 1 4 0v5l8 3v3l-8-2v6l3 2v2l-5-1-5 1v-2l3-2v-6l-8 2v-3Z',
+ boat:'m2 13 10 7 10-7-10-4-10 4Zm4-2V6h12v5M12 6V2M2 22q3-3 5 0 3-3 5 0 3-3 5 0 3-3 5 0',
+ box:'m3 7 9-5 9 5v11l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v11M7 4l10 6',
+ flag:'M4 22V3m0 0c7-4 9 4 16 0v11c-7 4-9-4-16 0',
+ shield:'m12 2 9 4v6c0 6-9 10-9 10S3 18 3 12V6l9-4Z',
+ ball:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-9 5 18 10M5 19 14 3M2 13c8 2 8-7 17-6M8 22c0-8 10-8 13-12',
+ fitness:'M2 8v8m3-11v14m14-14v14m3-11v8M5 12h14',
+ target:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 3v2',
+ drink:'m3 3 9 10 9-10H3Zm9 10v9m-5 0h10M6 6h12',
+ building:'M3 22V7h8v15m0-19h10v19M6 11h2m-2 4h2m7-8h2m-2 4h2m-2 4h2M1 22h22',
+ hospital:'M4 22V5h16v17M9 22v-6h6v6M12 7v6m-3-3h6',
+ camera:'M3 6h5l2-3h4l2 3h5v15H3V6Zm9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z',
+ train:'M5 3h14v15H5V3Zm0 9h14M9 3v9m6-9v9M7 18l-3 4m13-4 3 4M8 15h.1m8 0h.1',
+ star:'m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z',
+ search:'M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm5 12 7 7',
+ arrow:'M4 12h16m-7-7 7 7-7 7',
+ globe:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 0c-7 6-7 14 0 20 7-6 7-14 0-20ZM2 12h20',
+ telegram:'m22 3-4 18-6-5-4 4 1-7L22 3ZM2 10l20-7-13 10-7-3Zm7 3 3 3',
+ book:'M12 5C8 2 4 2 2 3v17c3-1 7 0 10 2 3-2 7-3 10-2V3c-2-1-6-1-10 2Zm0 0v17'
+};
+const category={ 'ammu-nation':'weapon',bank:'bank',clothing:'shirt','convenience-store':'shop',fence:'gem','food-and-drink':'food','gas-station':'fuel',haircut:'scissors','jewelry-store':'gem','phone-store':'phone',tattoo:'star','vehicle-dealer':'car','vehicle-mod-shop':'wrench',garage:'garage',hangar:'plane',helipad:'plane',marina:'boat',safehouse:'home','hidden-package':'box','stunt-jump':'flag','vehicle-spawn':'car','weapon-spawn':'weapon','armor-spawn':'shield',basketball:'ball','car-meet':'car',darts:'target',fishing:'boat','gang-compound':'shield',golf:'flag',gym:'fitness',hunting:'target','mini-golf':'flag',parachuting:'plane',pool:'ball',race:'flag','random-event':'pin','shooting-range':'target',atm:'bank',bar:'drink','car-wash':'car',cinema:'camera','city-town':'building','fire-station':'shield',hospital:'hospital',landmark:'camera',nightclub:'radio','police-station':'shield','public-transport':'train',personal:'star',shops:'shop',properties:'home',collectibles:'box','spawn-locations':'pin',activities:'flag','local-places':'building'};
+window.startIcon=name=>'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="'+(paths[category[name]||name]||paths.pin)+'"/></svg>';
+})();
