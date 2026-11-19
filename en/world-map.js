@@ -9,23 +9,40 @@
  state.found=Array.isArray(state.found)?state.found:[];state.favorites=Array.isArray(state.favorites)?state.favorites:[];state.notes=state.notes&&typeof state.notes==='object'?state.notes:{};state.custom=Array.isArray(state.custom)?state.custom.filter(p=>typeof p.id==='string'&&typeof p.name==='string'&&Number.isFinite(p.x)&&Number.isFinite(p.y)):[];
  let enabled=new Set(data.categories.map(c=>c.id).concat('personal')),adding=false,current=null;
  const crs=L.extend({},L.CRS.Simple,{transformation:new L.Transformation(1/32,512,-1/32,512)});
- const map=L.map(el,{crs,minZoom:-1,maxZoom:6,zoomSnap:1,zoomControl:false,maxBounds:[[-13000,-15000],[15000,13000]],maxBoundsViscosity:.8});
+ const map=L.map(el,{crs,minZoom:-1,maxZoom:5,zoomSnap:1,zoomControl:false,maxBounds:[[-13000,-15000],[15000,13000]],maxBoundsViscosity:.8});
  L.control.zoom({position:'topright'}).addTo(map);
  map.attributionControl.setPrefix(false);
  const tileRows=new Map();
  const LocalTiles=L.TileLayer.extend({createTile(coords,done){const img=document.createElement('img');img.alt='';img.setAttribute('role','presentation');const key=coords.z+'/'+coords.y;let request=tileRows.get(key);if(!request){request=fetch('../assets/tiles/'+key+'.json').then(r=>{if(!r.ok)throw Error('Tile row '+r.status);return r.json();});tileRows.set(key,request);}img.onload=()=>done(null,img);img.onerror=()=>done(Error('Tile image'),img);request.then(row=>{if(!row[coords.x])throw Error('Tile missing');img.src=row[coords.x];}).catch(error=>done(error,img));return img;}});
- const tiles=new LocalTiles('',{tileSize:256,minZoom:-1,minNativeZoom:0,maxNativeZoom:3,noWrap:true,bounds:[[-9088,-11008],[11008,10112]],attribution:'Map: <a href="https://gtadb.org" target="_blank" rel="noopener">gtadb.org and contributors</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> · adapted by Start'}).addTo(map);
+ const tiles=new LocalTiles('',{tileSize:256,minZoom:-1,minNativeZoom:0,maxNativeZoom:4,noWrap:true,bounds:[[-9088,-11008],[11008,10112]],attribution:'Map: <a href="https://gtadb.org" target="_blank" rel="noopener">gtadb.org and contributors</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> · adapted by Start'}).addTo(map);
  let errors=0;tiles.on('tileerror',()=>{if(++errors>=3)q('#world-message').textContent='Some map tiles are unavailable. Markers and search still work; try refreshing the page.';});
  map.fitBounds([[-8050,-9650],[9500,2500]]);
  const layer=L.markerClusterGroup({maxClusterRadius:36,showCoverageOnHover:false,disableClusteringAtZoom:5,spiderfyOnMaxZoom:true,iconCreateFunction:cluster=>L.divIcon({className:'world-cluster',html:'<span>'+cluster.getChildCount()+'</span>',iconSize:[38,38]})}).addTo(map),layers=new Map();
+
+ // Use the source map's actual county boundaries, not inferred circles.
+ map.createPane('start-counties').style.zIndex=350;
+ map.createPane('start-county-labels').style.zIndex=420;
+ const countyNames={},countyLayers=[];
+ for(const c of (window.START_COUNTIES||[])){
+  const polygon=L.polygon(c[3].map(ring=>ring.map(([x,y])=>[y,x])),{pane:'start-counties',className:'map-county',color:'#dbaaff',weight:1,opacity:.55,fillColor:'#b36bf0',fillOpacity:.025}).addTo(map);
+  const highlight=on=>polygon.setStyle({weight:on?3:1,opacity:on?1:.55,fillOpacity:on?.2:.025});
+  polygon.on('mouseover',()=>{if(!adding)highlight(true)}).on('mouseout',()=>highlight(false)).on('click',e=>{if(adding)return;L.DomEvent.stopPropagation(e);map.fitBounds(polygon.getBounds(),{padding:[35,35],maxZoom:3});});
+  const label=L.marker([c[2][1],c[2][0]],{pane:'start-county-labels',interactive:true,keyboard:false,icon:L.divIcon({className:'county-label',html:'<button type="button" aria-label="'+esc(countyNames[c[0]]||c[1])+'">'+esc(countyNames[c[0]]||c[1])+'</button>',iconSize:[0,0]})}).addTo(map);
+  label.on('mouseover',()=>highlight(true)).on('mouseout',()=>highlight(false)).on('click',()=>{if(!adding)map.fitBounds(polygon.getBounds(),{padding:[35,35],maxZoom:3});});
+  const button=label.getElement().querySelector('button');button.addEventListener('focus',()=>highlight(true));button.addEventListener('blur',()=>highlight(false));button.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();button.click();}});
+  countyLayers.push({polygon,label});
+ }
+ const syncLabels=()=>el.classList.toggle('county-labels-hidden',map.getZoom()>3);map.on('zoomend',syncLabels);syncLabels();
+ const help=document.createElement('p');help.className='county-help';help.textContent="Hover a county to highlight it; select its label to zoom in. Zoom further for detailed map tiles.";q('#world-categories').before(help);
+
  const all=()=>[...data.markers,...state.custom];
  const catName=p=>cats.get(p.category)?.name||'My places';
  function save(){if(!atlasSave('start-world-state',state))q('#world-message').textContent='Could not save progress. Download a backup.';}
  function selected(){const search=q('#world-search').value.trim().toLocaleLowerCase('en');return all().filter(p=>enabled.has(p.category)&&(!q('#world-hide-found').checked||!state.found.includes(p.id))&&(!q('#world-only-favorites').checked||state.favorites.includes(p.id))&&(p.name+' '+catName(p)+' '+(state.notes[p.id]||'')).toLocaleLowerCase('en').includes(search));}
- function categoryVisual(id){const photo=data.markers.find(p=>p.category===id&&p.image);return photo?'<img class="category-picture" src="'+esc(photo.image)+'" alt="" loading="lazy">':'<span class="category-icon">'+startIcon(id)+'</span>';}
+ function categoryVisual(id){const categoryPhotos={"bank":"assets/map-categories/bank.webp","convenience-store":"assets/map-categories/convenience-store.webp","fence":"assets/map-categories/fence.webp","gas-station":"assets/map-categories/gas-station.webp","golf":"assets/map-categories/golf.webp","gym":"assets/map-categories/gym.webp","bar":"assets/map-categories/bar.webp","car-wash":"assets/map-categories/car-wash.webp","cinema":"assets/map-categories/cinema.webp","fire-station":"assets/map-categories/fire-station.webp","hospital":"assets/map-categories/hospital.webp","police-station":"assets/map-categories/police-station.webp","public-transport":"assets/map-categories/public-transport.webp"};const override=categoryPhotos[id];const photo=override?{image:"../"+override}:data.markers.find(p=>p.category===id&&p.image);return photo?'<img class="category-picture" src="'+esc(photo.image)+'" alt="" loading="lazy">':'<span class="category-icon">'+startIcon(id)+'</span>';}
  function renderCategories(){q('#world-categories').innerHTML=data.groups.map(g=>{const items=data.categories.filter(c=>c.group===g.id&&data.markers.some(p=>p.category===c.id));return '<details open><summary>'+startIcon(g.id)+esc(g.name)+'</summary>'+items.map(c=>'<label class="map-category"><input type="checkbox" data-category="'+c.id+'" '+(enabled.has(c.id)?'checked':'')+'>'+categoryVisual(c.id)+'<span>'+esc(c.name)+'</span><small>'+data.markers.filter(p=>p.category===c.id).length+'</small></label>').join('')+'</details>';}).join('')+'<label class="map-category"><input type="checkbox" data-category="personal" '+(enabled.has('personal')?'checked':'')+'>'+categoryVisual('personal')+'<span>My places</span><small>'+state.custom.length+'</small></label>';}
  function markerIcon(p){const found=state.found.includes(p.id),group=cats.get(p.category)?.group||'personal';return L.divIcon({className:'world-marker '+(found?'is-found':''),html:'<span style="--pin-color:'+groupColors[group]+'">'+(found?startIcon('check'):startIcon(p.category))+'</span>',iconSize:[32,32],iconAnchor:[16,16]});}
- function render(){layer.clearLayers();layers.clear();const visible=selected();for(const p of visible){const marker=L.marker([p.y,p.x],{icon:markerIcon(p),title:p.name,alt:p.name,keyboard:true}).addTo(layer);marker.on('click',()=>open(p));layers.set(p.id,marker);}
+ function render(){layer.clearLayers();layers.clear();const visible=selected();for(const p of visible){const marker=L.marker([p.y,p.x],{icon:markerIcon(p),title:p.name,alt:p.name,keyboard:true}).addTo(layer);marker.bindTooltip(esc(p.name),{direction:'top',offset:[0,-17],className:'place-tooltip'});marker.on('click',()=>open(p));layers.set(p.id,marker);}
   q('#world-count').textContent=visible.length+' / '+all().length+' places';q('#world-progress').textContent='Found: '+all().filter(p=>state.found.includes(p.id)).length;
   q('#world-results').innerHTML=visible.map(p=>'<button type="button" data-place="'+esc(p.id)+'">'+(p.image?'<img class="result-thumb" src="'+esc(p.image)+'" alt="" loading="lazy">':'<span class="result-thumb fallback">'+startIcon(p.category)+'</span>')+'<span>'+esc(p.name)+'</span><small>'+esc(catName(p))+(state.found.includes(p.id)?' · ✓':'')+'</small></button>').join('')||'<p class="small">No matching places. Change your search or filters.</p>';
  }
